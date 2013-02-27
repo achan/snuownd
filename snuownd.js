@@ -1270,6 +1270,11 @@
 
 		out.s += '<a href="';
 		if (type == MKDA_EMAIL) out.s += 'mailto:';
+
+    var isRedditLink = link.s.charAt(0) === '/';
+    if (isRedditLink)
+      link.s = 'http://reddit.com' + link.s;
+
 		escape_href(out, link.s.slice(offset));
 
 		if (options.link_attributes) {
@@ -1290,7 +1295,8 @@
 		} else {
       var a = document.createElement('a');
       a.href = link.s;
-			escape_html(out, a.hostname, false);
+      
+			escape_html(out, isRedditLink ? a.pathname : a.hostname, false);
       out.s += ' <i class="icon-external-link"></i>';
 		}
 
