@@ -1296,7 +1296,7 @@
       var a = document.createElement('a');
       a.href = link.s;
       
-			escape_html(out, isRedditLink ? a.pathname : a.hostname, false);
+			escape_html(out, isRedditLink ? a.pathname : _shorten_hostname(a.hostname), false);
       out.s += ' <i class="icon-external-link"></i>';
 		}
 
@@ -1304,6 +1304,13 @@
 
 		return 1;
 	}
+
+  function _shorten_hostname(hostname) {
+    if (hostname.substring(0, 4) === 'www.')
+      hostname = hostname.substring(4);
+
+    return hostname;
+  }
 
 	// int (*codespan)(struct buf *ob, const struct buf *text, void *opaque);
 	function cb_codespan(out, text, options) {
@@ -1359,7 +1366,18 @@
 
 		out.s += '<a href="';
 
-		if (link && link.s.length) escape_href(out, link.s);
+    var hostname = '';
+
+		if (link && link.s.length) {
+      if (link.s.substring(0, 1) === '/')
+        link.s = 'http://reddit.com' + link.s;
+
+      escape_href(out, link.s);
+      var a = document.createElement('a');
+      a.href = link.s;
+
+      hostname = ' <span class="linkHostname">[' + _shorten_hostname(a.hostname) + ']</span>';
+    }
 
 		if (title && title.s.length) {
 			out.s += '" title="';
@@ -1376,6 +1394,9 @@
 
 		if (content && content.s.length) out.s += content.s;
 		out.s += '</a>';
+
+    out.s += hostname;
+
 		return 1;
 	}
 
